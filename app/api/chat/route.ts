@@ -1,7 +1,13 @@
 import { streamText, convertToModelMessages } from 'ai';
+import { createOpenAI } from '@ai-sdk/openai';
 import { parseARCAInvoiceCSV } from '@/lib/csv-parser';
 
 export const maxDuration = 30;
+
+// Configurar OpenAI con tu API key
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(req: Request) {
   try {
@@ -15,10 +21,9 @@ export async function POST(req: Request) {
       systemPrompt += `\n\nDatos de facturación de ARCA:\n${JSON.stringify(parsedData, null, 2)}`;
     }
 
-    // El AI Gateway de Vercel funciona directamente en v0
-    // Solo pasas el string del modelo - sin necesidad de API keys ni configuración
+    // Usar OpenAI directamente con tu API key
     const result = streamText({
-      model: 'openai/gpt-4o-mini', // Modelo disponible en el AI Gateway
+      model: openai('gpt-4o-mini'),
       system: systemPrompt,
       messages: await convertToModelMessages(messages),
     });
