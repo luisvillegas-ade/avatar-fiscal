@@ -1,4 +1,4 @@
-// File: C:\hackaton\Vercel202604\app\api\chat\route.ts
+// File: /vercel/share/v0-project/app/api/chat/route.ts
 import * as entry from '../../../../../app/api/chat/route.js'
 import type { NextRequest } from 'next/server.js'
 

@@ -1,4 +1,3 @@
-import { createOpenAI } from '@ai-sdk/openai';
 import { streamText, convertToModelMessages } from 'ai';
 import { parseARCAInvoiceCSV } from '@/lib/csv-parser';
 
@@ -9,20 +8,6 @@ export async function POST(req: Request) {
     const { messages, data } = await req.json();
     const csvContent = data?.csvContent;
 
-    const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_API_KEY;
-
-    if (!apiKey) {
-      throw new Error('No se encontró la API Key en el archivo .env.local');
-    }
-
-    // "Engañamos" al SDK de OpenAI para que use el Gateway de Vercel
-    const gateway = createOpenAI({
-      baseURL: 'https://ai-gateway.vercel.sh/v1',
-      apiKey: apiKey,
-    });
-
-    console.log('API Chat: Conectando vía Gateway Directo...');
-
     let systemPrompt = "Eres un asistente fiscal experto llamado 'Avatar Fiscal'. Tienes una personalidad de 'Mentor Salteño': profesional, amable, experto en impuestos (AFIP/Rentas) y seguridad informática.";
 
     if (csvContent) {
@@ -30,19 +15,21 @@ export async function POST(req: Request) {
       systemPrompt += `\n\nDatos de facturación de ARCA:\n${JSON.stringify(parsedData, null, 2)}`;
     }
 
+    // El AI Gateway de Vercel funciona directamente en v0
+    // Solo pasas el string del modelo - sin necesidad de API keys ni configuración
     const result = streamText({
-      // Usamos el modelo que vimos en tu Dashboard
-      model: gateway.chat('openai/gpt-5.4'),
+      model: 'openai/gpt-4o-mini', // Modelo disponible en el AI Gateway
       system: systemPrompt,
       messages: await convertToModelMessages(messages),
     });
 
     return result.toUIMessageStreamResponse();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('API Chat Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     return new Response(JSON.stringify({ 
       error: 'Error de configuración', 
-      details: error.message || 'Error desconocido' 
+      details: errorMessage
     }), { status: 500 });
   }
 }
