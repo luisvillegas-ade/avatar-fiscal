@@ -1,7 +1,13 @@
 import { streamText, convertToModelMessages } from 'ai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { parseARCAInvoiceCSV } from '@/lib/csv-parser';
 
 export const maxDuration = 30;
+
+// Usar Google Gemini directamente con tu API key gratuita
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+});
 
 export async function POST(req: Request) {
   try {
@@ -15,9 +21,9 @@ export async function POST(req: Request) {
       systemPrompt += `\n\nDatos de facturación de ARCA:\n${JSON.stringify(parsedData, null, 2)}`;
     }
 
-    // Usando Gemini via AI Gateway de Vercel
+    // Google Gemini 2.0 Flash - rápido y gratuito
     const result = streamText({
-      model: 'google/gemini-2.0-flash',
+      model: google('gemini-2.0-flash'),
       system: systemPrompt,
       messages: await convertToModelMessages(messages),
     });
