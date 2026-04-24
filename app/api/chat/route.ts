@@ -15,9 +15,9 @@ export async function POST(req: Request) {
       systemPrompt += `\n\nDatos de facturación de ARCA:\n${JSON.stringify(parsedData, null, 2)}`;
     }
 
-    // AI Gateway de Vercel - usa créditos de tu cuenta Vercel
+    // Usando Gemini via AI Gateway de Vercel
     const result = streamText({
-      model: 'openai/gpt-4o-mini',
+      model: 'google/gemini-2.0-flash',
       system: systemPrompt,
       messages: await convertToModelMessages(messages),
     });
