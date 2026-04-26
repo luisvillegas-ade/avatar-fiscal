@@ -40,3 +40,13 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
+
+/* Hide scrollbar for indicators */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
