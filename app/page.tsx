@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import AvatarPanel, { AvatarPanelRef } from '@/components/AvatarPanel';
 import FiscalDataPanel from '@/components/FiscalDataPanel';
+import TutorialOverlay from '@/components/TutorialOverlay';
 
 export default function Home() {
   const [iframeLoaded, setIframeLoaded] = useState(false);
