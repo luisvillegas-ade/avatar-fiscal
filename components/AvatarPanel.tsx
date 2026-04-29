@@ -89,19 +89,19 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
         })}
       </div>
 
-      <div className="p-4 border-b border-zinc-700 bg-zinc-800/90 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between transition-colors duration-500">
-        <div className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-full ${npcConfig[activeNpc].color} flex items-center justify-center shadow-xl ring-2 ring-white/30 transition-colors duration-500`}>
+      <div className="p-2.5 border-b border-zinc-700 bg-zinc-800 sticky top-0 z-10 flex items-center transition-colors duration-300">
+        <div className="flex items-center gap-2">
+          <div className={`w-8 h-8 rounded-full ${npcConfig[activeNpc].color} flex items-center justify-center shadow-md transition-colors duration-300`}>
             {(() => {
                const ActiveIcon = npcConfig[activeNpc].icon;
-               return <ActiveIcon className="w-6 h-6 text-white" />;
+               return <ActiveIcon className="w-4 h-4 text-white" />;
             })()}
           </div>
           <div>
-            <h2 className="text-sm font-bold text-white tracking-tight">{npcConfig[activeNpc].name}</h2>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-sm shadow-green-400/50" />
-              <span className="text-xs text-zinc-300 font-medium">{npcConfig[activeNpc].title}</span>
+            <h2 className="text-xs font-semibold text-white">{npcConfig[activeNpc].name}</h2>
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+              <span className="text-[10px] text-zinc-400">{npcConfig[activeNpc].title}</span>
             </div>
           </div>
         </div>
@@ -109,19 +109,19 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
 
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.length === 0 && !errorLocal && (
-          <div className="flex flex-col items-center justify-center h-full space-y-4 py-8">
-            <div className={`w-20 h-20 rounded-full ${npcConfig[activeNpc].color} flex items-center justify-center shadow-xl ring-4 ring-white/20`}>
-              <Bot className="w-10 h-10 text-white" />
+          <div className="flex flex-col items-center justify-center h-full space-y-3 py-6">
+            <div className={`w-12 h-12 rounded-full ${npcConfig[activeNpc].color} flex items-center justify-center shadow-lg`}>
+              <Bot className="w-6 h-6 text-white" />
             </div>
-            <div className="text-center space-y-2">
-              <p className="text-base font-semibold text-white">¿En qué puedo ayudarte hoy?</p>
-              <p className="text-sm text-zinc-300 max-w-[200px] leading-relaxed">
-                Soy tu asistente de <span className="font-medium text-white">{npcConfig[activeNpc].name}</span>
+            <div className="text-center space-y-1">
+              <p className="text-sm font-medium text-white">¿En qué puedo ayudarte?</p>
+              <p className="text-xs text-zinc-400">
+                Asistente de <span className="text-zinc-200">{npcConfig[activeNpc].name}</span>
               </p>
             </div>
-            <div className="bg-zinc-800/80 rounded-lg p-3 max-w-[240px] border border-zinc-700">
-              <p className="text-xs text-zinc-300 text-center leading-relaxed">
-                Camina hacia los personajes de cada oficina fiscal para preguntarle qué onda con tus tributos
+            <div className="bg-zinc-800 rounded-md p-2 max-w-[220px] border border-zinc-700">
+              <p className="text-[10px] text-zinc-400 text-center leading-relaxed">
+                Camina hacia los personajes de cada oficina fiscal para consultarles sobre tus tributos
               </p>
             </div>
           </div>
@@ -143,15 +143,15 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
             className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {m.role === 'assistant' && (
-              <div className={`w-6 h-6 rounded-full ${npcConfig[activeNpc].color} flex items-center justify-center mr-2 mt-1 flex-shrink-0 shadow-md`}>
-                <Bot className="w-3 h-3 text-white" />
+              <div className={`w-5 h-5 rounded-full ${npcConfig[activeNpc].color} flex items-center justify-center mr-1.5 mt-0.5 flex-shrink-0`}>
+                <Bot className="w-2.5 h-2.5 text-white" />
               </div>
             )}
             <div
-              className={`max-w-[85%] rounded-xl p-3 text-sm shadow-lg ${
+              className={`max-w-[85%] rounded-lg p-2 text-xs ${
                 m.role === 'user'
-                  ? `bg-zinc-700 text-white rounded-tr-none border border-zinc-600`
-                  : `bg-zinc-800 text-zinc-100 rounded-tl-none border-l-4 ${npcConfig[activeNpc].border}`
+                  ? `bg-zinc-700 text-white rounded-tr-none`
+                  : `bg-zinc-800 text-zinc-200 rounded-tl-none border-l-2 ${npcConfig[activeNpc].border}`
               }`}
             >
               {m.parts.map((part, i) => {
@@ -160,7 +160,7 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
                   if (display.startsWith('[ROLE:')) {
                     display = display.replace(/^\[ROLE:[a-z]+\]\s*/, '');
                   }
-                  return <span key={i} className="leading-relaxed">{display}</span>;
+                  return <span key={i} className="leading-normal">{display}</span>;
                 }
                 return null;
               })}
