@@ -10,6 +10,7 @@ interface FiscalData {
   condicionIVA: string;
   ubicacion: string;
   medioCobro: string;
+  comentariosAdicionales: string;
 }
 
 const condicionesIVA = [
@@ -93,6 +94,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
     condicionIVA: '',
     ubicacion: '',
     medioCobro: '',
+    comentariosAdicionales: '',
   });
 
   const [showNoInscriptoModal, setShowNoInscriptoModal] = useState(false);
@@ -102,6 +104,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
     ingresoEstimado: '',
     empleados: '',
     localFisico: '',
+    comentariosAdicionales: '',
   });
 
   const handleChange = (field: keyof FiscalData, value: string) => {
@@ -114,6 +117,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
     const medioCobroLabel = mediosDeCobro.find(m => m.value === fiscalData.medioCobro)?.label || fiscalData.medioCobro;
     
     const avisoFacturacion = fiscalData.medioCobro ? `\n\n**IMPORTANTE:** El contribuyente cobra mediante ${medioCobroLabel}. Recordale que debe facturar TODAS sus operaciones sin excepción, incluyendo las que cobra por este medio.` : '';
+    const comentarios = fiscalData.comentariosAdicionales ? `\n**Información adicional:** ${fiscalData.comentariosAdicionales}` : '';
     
     const message = `Hola, me gustaría una orientación fiscal. Esta es mi situación:
 
@@ -122,7 +126,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
 **Actividad:** ${fiscalData.actividad || 'No especificado'}
 **Condición frente al IVA:** ${condicionLabel || 'No especificado'}
 **Ubicación:** ${ubicacionLabel || 'No especificado'}
-**Medio de cobro:** ${medioCobroLabel || 'No especificado'}${avisoFacturacion}
+**Medio de cobro:** ${medioCobroLabel || 'No especificado'}${comentarios}${avisoFacturacion}
 
 ¿Qué me podés aconsejar sobre mis obligaciones tributarias?`;
     
@@ -137,6 +141,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
 
   const buildNoInscriptoMessage = () => {
     const tipoLabel = tiposNegocio.find(t => t.value === noInscriptoData.tipoNegocio)?.label || noInscriptoData.tipoNegocio;
+    const comentarios = noInscriptoData.comentariosAdicionales ? `\n**Información adicional:** ${noInscriptoData.comentariosAdicionales}` : '';
     
     return `Hola, no estoy inscripto actualmente y necesito orientación fiscal. Esta es mi situación:
 
@@ -144,7 +149,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
 **Tipo de negocio:** ${tipoLabel || 'No especificado'}
 **Ingreso mensual estimado:** ${noInscriptoData.ingresoEstimado ? `$${noInscriptoData.ingresoEstimado}` : 'No especificado'}
 **Cantidad de empleados:** ${noInscriptoData.empleados || 'No especificado'}
-**Local físico:** ${noInscriptoData.localFisico || 'No especificado'}
+**Local físico:** ${noInscriptoData.localFisico || 'No especificado'}${comentarios}
 
 ¿Qué opciones tengo para inscribirme y qué me recomendás hacer?`;
   };
@@ -163,6 +168,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
         ingresoEstimado: '',
         empleados: '',
         localFisico: '',
+        comentariosAdicionales: '',
       });
     }, 100);
   };
@@ -287,6 +293,21 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Comentarios Adicionales */}
+        <div className="space-y-1">
+          <label className="flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase tracking-wider">
+            <HelpCircle className="w-3 h-3" />
+            ¿Algo más que quieras compartir?
+          </label>
+          <textarea
+            value={fiscalData.comentariosAdicionales}
+            onChange={(e) => handleChange('comentariosAdicionales', e.target.value)}
+            placeholder="Ej: Tengo empleados, exporto servicios, recibo pagos del exterior..."
+            rows={2}
+            className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 focus:border-salta-bordo/50 placeholder:text-zinc-600 transition-all resize-none"
+          />
         </div>
       </div>
 
@@ -424,6 +445,20 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                   <option value="alquilado" className="bg-zinc-800">Sí, alquilado</option>
                   <option value="propio" className="bg-zinc-800">Sí, propio</option>
                 </select>
+              </div>
+
+              {/* Comentarios Adicionales */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                  ¿Algo más que quieras compartir?
+                </label>
+                <textarea
+                  value={noInscriptoData.comentariosAdicionales}
+                  onChange={(e) => handleNoInscriptoChange('comentariosAdicionales', e.target.value)}
+                  placeholder="Ej: Tengo dudas sobre si necesito facturar, recibo pagos del exterior..."
+                  rows={2}
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 placeholder:text-zinc-600 resize-none"
+                />
               </div>
 
               {/* Separador */}
