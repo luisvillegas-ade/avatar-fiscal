@@ -34,6 +34,10 @@ export default function Home() {
     avatarPanelRef.current?.sendMessageToChat(message);
   };
 
+  const handleChangeNpc = (npc: 'arca' | 'dgr' | 'muni') => {
+    avatarPanelRef.current?.changeNpc(npc);
+  };
+
   return (
     <main className="flex min-h-screen bg-black overflow-hidden">
       {/* Tutorial Overlay */}
@@ -42,7 +46,7 @@ export default function Home() {
       )}
       {/* Panel Izquierdo: Datos Fiscales */}
       <div className="w-[200px] h-screen border-r border-zinc-800 bg-zinc-950 flex-shrink-0">
-        <FiscalDataPanel onSendToChat={handleSendToChat} />
+        <FiscalDataPanel onSendToChat={handleSendToChat} onChangeNpc={handleChangeNpc} />
       </div>
 
       {/* Centro: Juego con paneles arriba y abajo */}

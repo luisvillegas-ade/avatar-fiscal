@@ -15,6 +15,7 @@ const npcConfig = {
 
 export interface AvatarPanelRef {
   sendMessageToChat: (message: string) => void;
+  changeNpc: (npc: 'arca' | 'dgr' | 'muni') => void;
 }
 
 const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
@@ -56,6 +57,9 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
   useImperativeHandle(ref, () => ({
     sendMessageToChat: (message: string) => {
       handleSendMessage(message);
+    },
+    changeNpc: (npc: 'arca' | 'dgr' | 'muni') => {
+      setActiveNpc(npc);
     }
   }));
 
