@@ -7,6 +7,7 @@ import TutorialOverlay from '@/components/TutorialOverlay';
 
 export default function Home() {
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [tutorialComplete, setTutorialComplete] = useState(false);
   const avatarPanelRef = useRef<AvatarPanelRef>(null);
 
   useEffect(() => {
@@ -35,6 +36,10 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen bg-black overflow-hidden">
+      {/* Tutorial Overlay */}
+      {!tutorialComplete && (
+        <TutorialOverlay onComplete={() => setTutorialComplete(true)} />
+      )}
       {/* Panel Izquierdo: Datos Fiscales */}
       <div className="w-[200px] h-screen border-r border-zinc-800 bg-zinc-950 flex-shrink-0">
         <FiscalDataPanel onSendToChat={handleSendToChat} />
