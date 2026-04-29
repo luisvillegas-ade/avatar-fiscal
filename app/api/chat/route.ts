@@ -1,13 +1,26 @@
 import { google } from '@ai-sdk/google';
 import { streamText, convertToModelMessages } from 'ai';
-import { parseARCAInvoiceCSV } from '@/lib/csv-parser';
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    const { messages, data } = await req.json();
-    const csvContent = data?.csvContent;
+    const json = await req.json();
+    const { messages, data } = json;
+    
+    // Extracción del rol desde el texto
+    let npcRole = 'arca';
+    const lastMessage = messages?.[messages.length - 1];
+    
+    if (lastMessage && typeof lastMessage.content === 'string' && lastMessage.content.startsWith('[ROLE:')) {
+      const match = lastMessage.content.match(/^\[ROLE:([a-z]+)\]/);
+      if (match) {
+        npcRole = match[1];
+        lastMessage.content = lastMessage.content.replace(/^\[ROLE:[a-z]+\]\s*/, '');
+      }
+    }
+
+    const csvContent = json.csvContent || data?.csvContent;
 
     // Use Google API Key
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
@@ -16,13 +29,19 @@ export async function POST(req: Request) {
       throw new Error('No se encontró GOOGLE_GENERATIVE_AI_API_KEY en las variables de entorno.');
     }
 
-    console.log('API Chat: Usando Gemini 1.5 Pro...');
+    let systemPrompt = "";
 
-    let systemPrompt = "Eres un asistente fiscal experto llamado 'Avatar Fiscal'. Tienes una personalidad de 'Mentor Salteño': profesional, amable, experto en impuestos (AFIP/Rentas) y seguridad informática.";
-
-    if (csvContent) {
-      const parsedData = parseARCAInvoiceCSV(csvContent);
-      systemPrompt += `\n\nDatos de facturación de ARCA:\n${JSON.stringify(parsedData, null, 2)}`;
+    switch (npcRole) {
+      case 'dgr':
+         systemPrompt = "Eres un inspector experto de la DGR Salta (Dirección General de Rentas). Tu nombre es 'Inspector Salteño'. Eres profesional pero muy amable, usas expresiones típicas de Salta. Eres un experto total en el Código Fiscal de la Provincia de Salta, Impuesto a las Actividades Económicas (Ingresos Brutos), Sellos y planes de pago provinciales. Siempre recordas al usuario que la DGR está para ayudar al contribuyente salteño.";
+         break;
+      case 'muni':
+         systemPrompt = "Eres un asesor de ARMSA (Agencia de Recaudación de la Municipalidad de Salta). Tu nombre es 'Guía Municipal'. Eres súper paciente y cálido. Tu especialidad es la Tasa de Inspección, Seguridad e Higiene (TISH), habilitaciones comerciales en la ciudad, y deudas de automotores/inmuebles municipales. Hablas como un vecino que quiere que su ciudad progrese. Siempre decís '¡Qué tal, vecino!' o similares.";
+         break;
+      case 'arca':
+      default:
+         systemPrompt = "Eres el 'Avatar Fiscal' original, experto de ARCA (ex AFIP). Tu personalidad es la de un Mentor Salteño: sabio, amable y tecnológico. Sabes todo sobre Monotributo, IVA, Ganancias y Facturación Electrónica Nacional. Ayudas a los emprendedores a no tenerle miedo a la AFIP.";
+         break;
     }
 
     const result = streamText({

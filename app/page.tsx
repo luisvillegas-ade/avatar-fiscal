@@ -33,7 +33,7 @@ export default function Home() {
       {/* Lado Izquierdo: Iframe (70vw) */}
       <div className="w-[70vw] h-screen relative bg-zinc-900 overflow-hidden border-r border-zinc-800">
         <iframe
-          src="/juego/index.html"
+          src="/juego/AvatarFiscal/www/index.html"
           className="w-full h-full border-none bg-black"
           onLoad={() => setIframeLoaded(true)}
           title="Simulador Fiscal"
