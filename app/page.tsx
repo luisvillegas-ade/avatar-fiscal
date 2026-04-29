@@ -8,7 +8,9 @@ import TutorialOverlay from '@/components/TutorialOverlay';
 export default function Home() {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [tutorialComplete, setTutorialComplete] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Inicia muteado por defecto
   const avatarPanelRef = useRef<AvatarPanelRef>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -38,6 +40,28 @@ export default function Home() {
     avatarPanelRef.current?.changeNpc(npc);
   };
 
+  const toggleMute = useCallback(() => {
+    const newMuted = !isMuted;
+    setIsMuted(newMuted);
+    // Enviar mensaje al iframe para silenciar/activar audio
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({
+        type: 'TOGGLE_AUDIO',
+        muted: newMuted
+      }, '*');
+    }
+  }, [isMuted]);
+
+  // Enviar estado de mute inicial cuando el iframe carga
+  useEffect(() => {
+    if (iframeLoaded && iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({
+        type: 'TOGGLE_AUDIO',
+        muted: isMuted
+      }, '*');
+    }
+  }, [iframeLoaded, isMuted]);
+
   return (
     <main className="flex min-h-screen bg-black overflow-hidden">
       {/* Tutorial Overlay */}
@@ -63,6 +87,7 @@ export default function Home() {
         {/* Iframe del Juego */}
         <div className="flex-1 relative bg-zinc-900 overflow-hidden">
           <iframe
+            ref={iframeRef}
             src="/juego/AvatarFiscal/www/index.html"
             className="w-full h-full border-none bg-black"
             onLoad={() => setIframeLoaded(true)}
@@ -88,7 +113,32 @@ export default function Home() {
               <span className="text-zinc-700">|</span>
               <span>ESPACIO para interactuar</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleMute}
+                className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium transition-all ${
+                  isMuted 
+                    ? 'bg-zinc-700 text-zinc-400 hover:bg-zinc-600' 
+                    : 'bg-green-700/50 text-green-300 hover:bg-green-700/70'
+                }`}
+              >
+                {isMuted ? (
+                  <>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                    </svg>
+                    Sonido OFF
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
+                    Sonido ON
+                  </>
+                )}
+              </button>
               <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[9px] font-semibold rounded uppercase tracking-wide">Beta</span>
             </div>
           </div>

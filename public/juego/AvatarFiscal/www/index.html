@@ -38,6 +38,47 @@
                     DataManager.setupNewGame();
                     SceneManager.goto(Scene_Map);
                 };
+
+                // 3. Listener para control de audio desde el padre (Next.js)
+                var savedMasterVolume = 1;
+                window.addEventListener('message', function(event) {
+                    if (event.data && event.data.type === 'TOGGLE_AUDIO') {
+                        if (typeof AudioManager !== 'undefined') {
+                            if (event.data.muted) {
+                                // Guardar volumen actual y silenciar
+                                savedMasterVolume = AudioManager.masterVolume;
+                                AudioManager.masterVolume = 0;
+                                // También detener BGM actual
+                                if (AudioManager._bgmBuffer) {
+                                    AudioManager._bgmBuffer.stop();
+                                }
+                                if (AudioManager._bgsBuffer) {
+                                    AudioManager._bgsBuffer.stop();
+                                }
+                            } else {
+                                // Restaurar volumen
+                                AudioManager.masterVolume = savedMasterVolume || 1;
+                                // Reanudar BGM si había uno
+                                if (AudioManager._currentBgm) {
+                                    AudioManager.playBgm(AudioManager._currentBgm);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // 4. Iniciar con audio silenciado por defecto
+                var _AudioManager_playBgm = null;
+                var _audioInitialized = false;
+                document.addEventListener('DOMContentLoaded', function() {
+                    var checkAudio = setInterval(function() {
+                        if (typeof AudioManager !== 'undefined' && !_audioInitialized) {
+                            _audioInitialized = true;
+                            AudioManager.masterVolume = 0;
+                            clearInterval(checkAudio);
+                        }
+                    }, 100);
+                });
             })();
         </script>
     </body>
