@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, DollarSign, ShoppingCart, Briefcase, MapPin, Tag, HelpCircle, X, ShieldCheck, Landmark, Building2 } from 'lucide-react';
+import { Send, DollarSign, ShoppingCart, Briefcase, MapPin, Tag, HelpCircle, X, ShieldCheck, Landmark, Building2, ClipboardCheck, UserPlus } from 'lucide-react';
 
 interface FiscalData {
   ventasNetas: string;
@@ -80,6 +80,9 @@ const npcButtons = [
 ];
 
 export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDataPanelProps) {
+  const [showInscriptoModal, setShowInscriptoModal] = useState(false);
+  const [showNoInscriptoModal, setShowNoInscriptoModal] = useState(false);
+  
   const [fiscalData, setFiscalData] = useState<FiscalData>({
     ventasNetas: '',
     comprasNetas: '',
@@ -88,7 +91,6 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
     ubicacion: '',
   });
 
-  const [showNoInscriptoModal, setShowNoInscriptoModal] = useState(false);
   const [noInscriptoData, setNoInscriptoData] = useState({
     descripcion: '',
     tipoNegocio: '',
@@ -126,6 +128,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
 ¿Qué me puedes aconsejar?`;
 
     onSendToChat(message);
+    setShowInscriptoModal(false);
   };
 
   const hasAnyData = Object.values(fiscalData).some(v => v.trim() !== '');
@@ -153,7 +156,6 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
     if (onChangeNpc) {
       onChangeNpc(npc);
     }
-    // Pequeño delay para que el NPC cambie antes de enviar el mensaje
     setTimeout(() => {
       onSendToChat(message);
       setShowNoInscriptoModal(false);
@@ -170,115 +172,29 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
   const hasNoInscriptoData = noInscriptoData.descripcion.trim() !== '' || noInscriptoData.tipoNegocio !== '';
 
   return (
-    <div className="flex flex-col gap-3 p-3 bg-zinc-900/80 backdrop-blur-sm text-zinc-100 h-full">
-      <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-        <Briefcase className="w-3.5 h-3.5" />
-        Datos Fiscales
-      </h3>
-
-      <div className="grid grid-cols-2 gap-2">
-        {/* Ventas Netas */}
-        <div className="space-y-1">
-          <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-            <DollarSign className="w-3 h-3" />
-            Ventas Netas
-          </label>
-          <div className="relative">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
-            <input
-              type="text"
-              value={fiscalData.ventasNetas}
-              onChange={(e) => handleCurrencyChange('ventasNetas', e.target.value)}
-              placeholder="0"
-              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 placeholder:text-zinc-600"
-            />
-          </div>
-        </div>
-
-        {/* Compras Netas */}
-        <div className="space-y-1">
-          <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-            <ShoppingCart className="w-3 h-3" />
-            Compras Netas
-          </label>
-          <div className="relative">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
-            <input
-              type="text"
-              value={fiscalData.comprasNetas}
-              onChange={(e) => handleCurrencyChange('comprasNetas', e.target.value)}
-              placeholder="0"
-              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 placeholder:text-zinc-600"
-            />
-          </div>
-        </div>
+    <div className="flex flex-col gap-4 p-4 bg-zinc-900/80 backdrop-blur-sm text-zinc-100 h-full">
+      {/* Header */}
+      <div className="text-center space-y-1">
+        <h3 className="text-sm font-bold text-white">Tu Situación Fiscal</h3>
+        <p className="text-[10px] text-zinc-500">Seleccioná una opción para comenzar</p>
       </div>
 
-      {/* Actividad */}
-      <div className="space-y-1">
-        <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-          <Briefcase className="w-3 h-3" />
-          Actividad
-        </label>
-        <input
-          type="text"
-          value={fiscalData.actividad}
-          onChange={(e) => handleChange('actividad', e.target.value)}
-          placeholder="Ej: Desarrollador de software, Comercio minorista..."
-          className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 placeholder:text-zinc-600"
-        />
-      </div>
-
-      {/* Categoría Monotributo */}
-      <div className="space-y-1">
-        <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-          <Tag className="w-3 h-3" />
-          Categoría Monotributo
-        </label>
-        <select
-          value={fiscalData.categoriaMonotributo}
-          onChange={(e) => handleChange('categoriaMonotributo', e.target.value)}
-          className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer"
-        >
-          {categoriasMonotributo.map((cat) => (
-            <option key={cat.value} value={cat.value} className="bg-zinc-800">
-              {cat.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Ubicación */}
-      <div className="space-y-1">
-        <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-          <MapPin className="w-3 h-3" />
-          Ubicación
-        </label>
-        <select
-          value={fiscalData.ubicacion}
-          onChange={(e) => handleChange('ubicacion', e.target.value)}
-          className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer"
-        >
-          {provinciasArgentina.map((prov) => (
-            <option key={prov.value} value={prov.value} className="bg-zinc-800">
-              {prov.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Botón Enviar */}
+      {/* Botón Ya Inscripto */}
       <button
-        onClick={handleSubmit}
-        disabled={!hasAnyData}
-        className="mt-auto flex items-center justify-center gap-2 bg-salta-bordo hover:bg-salta-bordo/80 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium py-2 px-3 rounded-lg text-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+        onClick={() => setShowInscriptoModal(true)}
+        className="flex flex-col items-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white p-4 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] group"
       >
-        <Send className="w-3.5 h-3.5" />
-        Consultar al Experto
+        <div className="w-10 h-10 rounded-full bg-salta-bordo/20 flex items-center justify-center group-hover:bg-salta-bordo/30 transition-colors">
+          <ClipboardCheck className="w-5 h-5 text-salta-bordo" />
+        </div>
+        <div className="text-center">
+          <span className="text-xs font-semibold block">Ya estoy inscripto</span>
+          <span className="text-[10px] text-zinc-500">Cargar mis datos fiscales</span>
+        </div>
       </button>
 
       {/* Separador */}
-      <div className="flex items-center gap-2 my-2">
+      <div className="flex items-center gap-2">
         <div className="flex-1 h-px bg-zinc-700" />
         <span className="text-[9px] text-zinc-500 uppercase">o</span>
         <div className="flex-1 h-px bg-zinc-700" />
@@ -287,11 +203,148 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
       {/* Botón No Inscripto */}
       <button
         onClick={() => setShowNoInscriptoModal(true)}
-        className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 hover:text-white font-medium py-2 px-3 rounded-lg text-xs transition-all"
+        className="flex flex-col items-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white p-4 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] group"
       >
-        <HelpCircle className="w-3.5 h-3.5" />
-        ¿No estás inscripto?
+        <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
+          <UserPlus className="w-5 h-5 text-amber-400" />
+        </div>
+        <div className="text-center">
+          <span className="text-xs font-semibold block">No estoy inscripto</span>
+          <span className="text-[10px] text-zinc-500">Necesito orientación</span>
+        </div>
       </button>
+
+      {/* Instrucciones */}
+      <div className="mt-auto bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
+        <p className="text-[10px] text-zinc-400 text-center leading-relaxed">
+          Completá tus datos y luego acercate a un personaje en el juego para consultar con el experto correspondiente.
+        </p>
+      </div>
+
+      {/* Modal Ya Inscripto */}
+      {showInscriptoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl w-[90%] max-w-md max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-zinc-700">
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="w-5 h-5 text-salta-bordo" />
+                <h3 className="text-sm font-bold text-white">Mis Datos Fiscales</h3>
+              </div>
+              <button
+                onClick={() => setShowInscriptoModal(false)}
+                className="p-1 hover:bg-zinc-700 rounded-md transition-colors"
+              >
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                {/* Ventas Netas */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
+                    <DollarSign className="w-3 h-3" />
+                    Ventas Netas
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
+                    <input
+                      type="text"
+                      value={fiscalData.ventasNetas}
+                      onChange={(e) => handleCurrencyChange('ventasNetas', e.target.value)}
+                      placeholder="0"
+                      className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 placeholder:text-zinc-600"
+                    />
+                  </div>
+                </div>
+
+                {/* Compras Netas */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
+                    <ShoppingCart className="w-3 h-3" />
+                    Compras Netas
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
+                    <input
+                      type="text"
+                      value={fiscalData.comprasNetas}
+                      onChange={(e) => handleCurrencyChange('comprasNetas', e.target.value)}
+                      placeholder="0"
+                      className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 placeholder:text-zinc-600"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Actividad */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
+                  <Briefcase className="w-3 h-3" />
+                  Actividad
+                </label>
+                <input
+                  type="text"
+                  value={fiscalData.actividad}
+                  onChange={(e) => handleChange('actividad', e.target.value)}
+                  placeholder="Ej: Desarrollador de software, Comercio minorista..."
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 placeholder:text-zinc-600"
+                />
+              </div>
+
+              {/* Categoría Monotributo */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
+                  <Tag className="w-3 h-3" />
+                  Categoría Monotributo
+                </label>
+                <select
+                  value={fiscalData.categoriaMonotributo}
+                  onChange={(e) => handleChange('categoriaMonotributo', e.target.value)}
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer"
+                >
+                  {categoriasMonotributo.map((cat) => (
+                    <option key={cat.value} value={cat.value} className="bg-zinc-800">
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Ubicación */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  Ubicación
+                </label>
+                <select
+                  value={fiscalData.ubicacion}
+                  onChange={(e) => handleChange('ubicacion', e.target.value)}
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer"
+                >
+                  {provinciasArgentina.map((prov) => (
+                    <option key={prov.value} value={prov.value} className="bg-zinc-800">
+                      {prov.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Botón Enviar */}
+              <button
+                onClick={handleSubmit}
+                disabled={!hasAnyData}
+                className="w-full flex items-center justify-center gap-2 bg-salta-bordo hover:bg-salta-bordo/80 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg text-sm transition-all hover:scale-[1.01] active:scale-[0.99]"
+              >
+                <Send className="w-4 h-4" />
+                Consultar al Experto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal No Inscripto */}
       {showNoInscriptoModal && (
@@ -327,7 +380,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                   onChange={(e) => handleNoInscriptoChange('descripcion', e.target.value)}
                   placeholder="Ej: Tengo un emprendimiento de venta de ropa por Instagram, trabajo desde mi casa..."
                   rows={3}
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 placeholder:text-zinc-600 resize-none"
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 placeholder:text-zinc-600 resize-none"
                 />
               </div>
 
@@ -339,7 +392,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                 <select
                   value={noInscriptoData.tipoNegocio}
                   onChange={(e) => handleNoInscriptoChange('tipoNegocio', e.target.value)}
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
                 >
                   {tiposNegocio.map((tipo) => (
                     <option key={tipo.value} value={tipo.value} className="bg-zinc-800">
@@ -353,7 +406,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                 {/* Ingreso Estimado */}
                 <div className="space-y-1">
                   <label className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                    Ingreso mensual estimado
+                    Ingreso mensual
                   </label>
                   <div className="relative">
                     <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
@@ -362,7 +415,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                       value={noInscriptoData.ingresoEstimado}
                       onChange={(e) => handleNoInscriptoChange('ingresoEstimado', formatCurrency(e.target.value))}
                       placeholder="0"
-                      className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 placeholder:text-zinc-600"
+                      className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 placeholder:text-zinc-600"
                     />
                   </div>
                 </div>
@@ -375,12 +428,12 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                   <select
                     value={noInscriptoData.empleados}
                     onChange={(e) => handleNoInscriptoChange('empleados', e.target.value)}
-                    className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
+                    className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
                   >
                     <option value="" className="bg-zinc-800">Seleccionar...</option>
-                    <option value="0" className="bg-zinc-800">Ninguno (solo yo)</option>
-                    <option value="1-3" className="bg-zinc-800">1 a 3 empleados</option>
-                    <option value="4-10" className="bg-zinc-800">4 a 10 empleados</option>
+                    <option value="0" className="bg-zinc-800">Solo yo</option>
+                    <option value="1-3" className="bg-zinc-800">1 a 3</option>
+                    <option value="4-10" className="bg-zinc-800">4 a 10</option>
                     <option value="10+" className="bg-zinc-800">Más de 10</option>
                   </select>
                 </div>
@@ -394,7 +447,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                 <select
                   value={noInscriptoData.localFisico}
                   onChange={(e) => handleNoInscriptoChange('localFisico', e.target.value)}
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
                 >
                   <option value="" className="bg-zinc-800">Seleccionar...</option>
                   <option value="no" className="bg-zinc-800">No, trabajo desde casa / virtual</option>
@@ -404,7 +457,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
               </div>
 
               {/* Separador */}
-              <div className="pt-2 border-t border-zinc-700">
+              <div className="pt-3 border-t border-zinc-700">
                 <p className="text-[10px] text-zinc-500 text-center mb-3">
                   Elegí a quién querés consultar:
                 </p>
@@ -418,9 +471,9 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                         key={npc.key}
                         onClick={() => handleSendToNpc(npc.key)}
                         disabled={!hasNoInscriptoData}
-                        className={`${npc.color} ${npc.hoverColor} disabled:bg-zinc-700 disabled:cursor-not-allowed text-white p-2 rounded-lg transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col items-center gap-1`}
+                        className={`${npc.color} ${npc.hoverColor} disabled:bg-zinc-700 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col items-center gap-1`}
                       >
-                        <Icon className="w-4 h-4" />
+                        <Icon className="w-5 h-5" />
                         <span className="text-[10px] font-medium">{npc.name}</span>
                       </button>
                     );
