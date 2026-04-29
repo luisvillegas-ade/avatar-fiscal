@@ -7,24 +7,38 @@ interface FiscalData {
   ventasNetas: string;
   comprasNetas: string;
   actividad: string;
-  categoriaMonotributo: string;
+  condicionIVA: string;
   ubicacion: string;
+  medioCobro: string;
 }
 
-const categoriasMonotributo = [
-  { value: '', label: 'Seleccionar categoría...' },
-  { value: 'A', label: 'A - Hasta $2.108.288' },
-  { value: 'B', label: 'B - Hasta $3.133.941' },
-  { value: 'C', label: 'C - Hasta $4.387.518' },
-  { value: 'D', label: 'D - Hasta $5.449.094' },
-  { value: 'E', label: 'E - Hasta $6.416.528' },
-  { value: 'F', label: 'F - Hasta $8.020.660' },
-  { value: 'G', label: 'G - Hasta $9.624.792' },
-  { value: 'H', label: 'H - Hasta $11.916.410' },
-  { value: 'I', label: 'I - Hasta $13.337.213' },
-  { value: 'J', label: 'J - Hasta $15.285.088' },
-  { value: 'K', label: 'K - Hasta $16.957.968' },
-  { value: 'no_monotributo', label: 'No soy monotributista' },
+const condicionesIVA = [
+  { value: '', label: 'Seleccionar condición...' },
+  { value: 'responsable_inscripto', label: 'Responsable Inscripto' },
+  { value: 'exento', label: 'Exento' },
+  { value: 'no_se', label: 'No lo sé' },
+  { value: 'monotributo_A', label: 'Monotributo A - Hasta $2.108.288' },
+  { value: 'monotributo_B', label: 'Monotributo B - Hasta $3.133.941' },
+  { value: 'monotributo_C', label: 'Monotributo C - Hasta $4.387.518' },
+  { value: 'monotributo_D', label: 'Monotributo D - Hasta $5.449.094' },
+  { value: 'monotributo_E', label: 'Monotributo E - Hasta $6.416.528' },
+  { value: 'monotributo_F', label: 'Monotributo F - Hasta $8.020.660' },
+  { value: 'monotributo_G', label: 'Monotributo G - Hasta $9.624.792' },
+  { value: 'monotributo_H', label: 'Monotributo H - Hasta $11.916.410' },
+  { value: 'monotributo_I', label: 'Monotributo I - Hasta $13.337.213' },
+  { value: 'monotributo_J', label: 'Monotributo J - Hasta $15.285.088' },
+  { value: 'monotributo_K', label: 'Monotributo K - Hasta $16.957.968' },
+];
+
+const mediosDeCobro = [
+  { value: '', label: 'Seleccionar medio...' },
+  { value: 'transferencia', label: 'Transferencia bancaria' },
+  { value: 'mercadopago', label: 'Mercado Pago' },
+  { value: 'efectivo', label: 'Efectivo' },
+  { value: 'tarjeta', label: 'Tarjeta de crédito/débito' },
+  { value: 'crypto', label: 'Criptomonedas / Bitcoin' },
+  { value: 'cheque', label: 'Cheque' },
+  { value: 'mixto', label: 'Varios medios combinados' },
 ];
 
 const provincias = [
@@ -76,8 +90,9 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
     ventasNetas: '',
     comprasNetas: '',
     actividad: '',
-    categoriaMonotributo: '',
+    condicionIVA: '',
     ubicacion: '',
+    medioCobro: '',
   });
 
   const [showNoInscriptoModal, setShowNoInscriptoModal] = useState(false);
@@ -94,16 +109,20 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
   };
 
   const handleSubmit = () => {
-    const categoriaLabel = categoriasMonotributo.find(c => c.value === fiscalData.categoriaMonotributo)?.label || fiscalData.categoriaMonotributo;
+    const condicionLabel = condicionesIVA.find(c => c.value === fiscalData.condicionIVA)?.label || fiscalData.condicionIVA;
     const ubicacionLabel = provincias.find(p => p.value === fiscalData.ubicacion)?.label || fiscalData.ubicacion;
+    const medioCobroLabel = mediosDeCobro.find(m => m.value === fiscalData.medioCobro)?.label || fiscalData.medioCobro;
+    
+    const avisoFacturacion = fiscalData.medioCobro ? `\n\n**IMPORTANTE:** El contribuyente cobra mediante ${medioCobroLabel}. Recordale que debe facturar TODAS sus operaciones sin excepción, incluyendo las que cobra por este medio.` : '';
     
     const message = `Hola, me gustaría una orientación fiscal. Esta es mi situación:
 
 **Ventas Netas Mensuales:** ${fiscalData.ventasNetas ? `$${fiscalData.ventasNetas}` : 'No especificado'}
 **Compras Netas Mensuales:** ${fiscalData.comprasNetas ? `$${fiscalData.comprasNetas}` : 'No especificado'}
 **Actividad:** ${fiscalData.actividad || 'No especificado'}
-**Categoría Monotributo:** ${categoriaLabel || 'No especificado'}
+**Condición frente al IVA:** ${condicionLabel || 'No especificado'}
 **Ubicación:** ${ubicacionLabel || 'No especificado'}
+**Medio de cobro:** ${medioCobroLabel || 'No especificado'}${avisoFacturacion}
 
 ¿Qué me podés aconsejar sobre mis obligaciones tributarias?`;
     
@@ -213,20 +232,20 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
           />
         </div>
 
-        {/* Categoría Monotributo */}
+        {/* Condición IVA / Monotributo */}
         <div className="space-y-1">
           <label className="flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase tracking-wider">
             <Tag className="w-3 h-3" />
-            Categoría Monotributo
+            Condición IVA / Monotributo
           </label>
           <select
-            value={fiscalData.categoriaMonotributo}
-            onChange={(e) => handleChange('categoriaMonotributo', e.target.value)}
+            value={fiscalData.condicionIVA}
+            onChange={(e) => handleChange('condicionIVA', e.target.value)}
             className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 focus:border-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer transition-all"
           >
-            {categoriasMonotributo.map((cat) => (
-              <option key={cat.value} value={cat.value} className="bg-zinc-800">
-                {cat.label}
+            {condicionesIVA.map((cond) => (
+              <option key={cond.value} value={cond.value} className="bg-zinc-800">
+                {cond.label}
               </option>
             ))}
           </select>
@@ -246,6 +265,25 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
             {provincias.map((prov) => (
               <option key={prov.value} value={prov.value} className="bg-zinc-800">
                 {prov.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Medio de Cobro */}
+        <div className="space-y-1">
+          <label className="flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase tracking-wider">
+            <DollarSign className="w-3 h-3" />
+            ¿Cómo cobrás?
+          </label>
+          <select
+            value={fiscalData.medioCobro}
+            onChange={(e) => handleChange('medioCobro', e.target.value)}
+            className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 focus:border-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer transition-all"
+          >
+            {mediosDeCobro.map((medio) => (
+              <option key={medio.value} value={medio.value} className="bg-zinc-800">
+                {medio.label}
               </option>
             ))}
           </select>
