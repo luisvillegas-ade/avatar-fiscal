@@ -13,9 +13,9 @@ export default function Home() {
       if (event.data?.type === 'GAME_READY') {
         setIframeLoaded(true);
       }
-      if (event.data?.type === 'AVATAR_INTERACTION') {
-        console.log('Interacción con el Avatar Fiscal iniciada desde el juego');
-        // Aquí podrías disparar alguna animación o mensaje automático
+      if (event.data?.type === 'NPC_INTERACTION') {
+        console.log('Interacción con NPC:', event.data.npcId);
+        // El mensaje se propaga al AvatarPanel automáticamente
       }
     };
 
