@@ -45,7 +45,7 @@ export default function Home() {
         <TutorialOverlay onComplete={() => setTutorialComplete(true)} />
       )}
       {/* Panel Izquierdo: Datos Fiscales */}
-      <div className="w-[200px] h-screen border-r border-zinc-800 bg-zinc-950 flex-shrink-0">
+      <div className="w-[280px] h-screen border-r border-zinc-800 bg-zinc-950 flex-shrink-0">
         <FiscalDataPanel onSendToChat={handleSendToChat} onChangeNpc={handleChangeNpc} />
       </div>
 

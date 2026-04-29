@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, DollarSign, ShoppingCart, Briefcase, MapPin, Tag, HelpCircle, X, ShieldCheck, Landmark, Building2, ClipboardCheck, UserPlus } from 'lucide-react';
+import { Send, DollarSign, ShoppingCart, Briefcase, MapPin, Tag, HelpCircle, X, ShieldCheck, Landmark, Building2 } from 'lucide-react';
 
 interface FiscalData {
   ventasNetas: string;
@@ -13,51 +13,33 @@ interface FiscalData {
 
 const categoriasMonotributo = [
   { value: '', label: 'Seleccionar categoría...' },
-  { value: 'A', label: 'Categoría A - Hasta $2.108.288,01' },
-  { value: 'B', label: 'Categoría B - Hasta $3.133.941,63' },
-  { value: 'C', label: 'Categoría C - Hasta $4.387.518,23' },
-  { value: 'D', label: 'Categoría D - Hasta $5.449.094,55' },
-  { value: 'E', label: 'Categoría E - Hasta $6.416.528,72' },
-  { value: 'F', label: 'Categoría F - Hasta $8.020.660,90' },
-  { value: 'G', label: 'Categoría G - Hasta $9.624.793,05' },
-  { value: 'H', label: 'Categoría H - Hasta $11.916.410,45' },
-  { value: 'I', label: 'Categoría I - Hasta $13.337.213,22' },
-  { value: 'J', label: 'Categoría J - Hasta $15.285.088,04' },
-  { value: 'K', label: 'Categoría K - Hasta $16.957.968,71' },
+  { value: 'A', label: 'A - Hasta $2.108.288' },
+  { value: 'B', label: 'B - Hasta $3.133.941' },
+  { value: 'C', label: 'C - Hasta $4.387.518' },
+  { value: 'D', label: 'D - Hasta $5.449.094' },
+  { value: 'E', label: 'E - Hasta $6.416.528' },
+  { value: 'F', label: 'F - Hasta $8.020.660' },
+  { value: 'G', label: 'G - Hasta $9.624.792' },
+  { value: 'H', label: 'H - Hasta $11.916.410' },
+  { value: 'I', label: 'I - Hasta $13.337.213' },
+  { value: 'J', label: 'J - Hasta $15.285.088' },
+  { value: 'K', label: 'K - Hasta $16.957.968' },
+  { value: 'no_monotributo', label: 'No soy monotributista' },
 ];
 
-const provinciasArgentina = [
+const provincias = [
   { value: '', label: 'Seleccionar ubicación...' },
+  { value: 'salta_capital', label: 'Salta Capital' },
+  { value: 'salta_interior', label: 'Salta Interior' },
   { value: 'buenos_aires', label: 'Buenos Aires' },
-  { value: 'catamarca', label: 'Catamarca' },
-  { value: 'chaco', label: 'Chaco' },
-  { value: 'chubut', label: 'Chubut' },
-  { value: 'cordoba', label: 'Córdoba' },
-  { value: 'corrientes', label: 'Corrientes' },
-  { value: 'entre_rios', label: 'Entre Ríos' },
-  { value: 'formosa', label: 'Formosa' },
-  { value: 'jujuy', label: 'Jujuy' },
-  { value: 'la_pampa', label: 'La Pampa' },
-  { value: 'la_rioja', label: 'La Rioja' },
-  { value: 'mendoza', label: 'Mendoza' },
-  { value: 'misiones', label: 'Misiones' },
-  { value: 'neuquen', label: 'Neuquén' },
-  { value: 'rio_negro', label: 'Río Negro' },
-  { value: 'salta', label: 'Salta' },
-  { value: 'san_juan', label: 'San Juan' },
-  { value: 'san_luis', label: 'San Luis' },
-  { value: 'santa_cruz', label: 'Santa Cruz' },
-  { value: 'santa_fe', label: 'Santa Fe' },
-  { value: 'santiago_del_estero', label: 'Santiago del Estero' },
-  { value: 'tierra_del_fuego', label: 'Tierra del Fuego' },
-  { value: 'tucuman', label: 'Tucumán' },
   { value: 'caba', label: 'CABA' },
+  { value: 'cordoba', label: 'Córdoba' },
+  { value: 'mendoza', label: 'Mendoza' },
+  { value: 'santa_fe', label: 'Santa Fe' },
+  { value: 'tucuman', label: 'Tucumán' },
+  { value: 'jujuy', label: 'Jujuy' },
+  { value: 'otra', label: 'Otra provincia' },
 ];
-
-interface FiscalDataPanelProps {
-  onSendToChat: (message: string) => void;
-  onChangeNpc?: (npc: 'arca' | 'dgr' | 'muni') => void;
-}
 
 const tiposNegocio = [
   { value: '', label: 'Seleccionar tipo de negocio...' },
@@ -79,10 +61,17 @@ const npcButtons = [
   { key: 'muni' as const, name: 'Muni Salta', color: 'bg-emerald-700', hoverColor: 'hover:bg-emerald-600', icon: Building2, description: 'Tasas Municipales' },
 ];
 
+interface FiscalDataPanelProps {
+  onSendToChat: (message: string) => void;
+  onChangeNpc?: (npc: 'arca' | 'dgr' | 'muni') => void;
+}
+
+const formatCurrency = (value: string) => {
+  const numbers = value.replace(/\D/g, '');
+  return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
 export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDataPanelProps) {
-  const [showInscriptoModal, setShowInscriptoModal] = useState(false);
-  const [showNoInscriptoModal, setShowNoInscriptoModal] = useState(false);
-  
   const [fiscalData, setFiscalData] = useState<FiscalData>({
     ventasNetas: '',
     comprasNetas: '',
@@ -91,6 +80,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
     ubicacion: '',
   });
 
+  const [showNoInscriptoModal, setShowNoInscriptoModal] = useState(false);
   const [noInscriptoData, setNoInscriptoData] = useState({
     descripcion: '',
     tipoNegocio: '',
@@ -103,32 +93,21 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
     setFiscalData(prev => ({ ...prev, [field]: value }));
   };
 
-  const formatCurrency = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (!numbers) return '';
-    return new Intl.NumberFormat('es-AR').format(parseInt(numbers));
-  };
-
-  const handleCurrencyChange = (field: 'ventasNetas' | 'comprasNetas', value: string) => {
-    const formatted = formatCurrency(value);
-    setFiscalData(prev => ({ ...prev, [field]: formatted }));
-  };
-
   const handleSubmit = () => {
     const categoriaLabel = categoriasMonotributo.find(c => c.value === fiscalData.categoriaMonotributo)?.label || fiscalData.categoriaMonotributo;
-    const ubicacionLabel = provinciasArgentina.find(p => p.value === fiscalData.ubicacion)?.label || fiscalData.ubicacion;
+    const ubicacionLabel = provincias.find(p => p.value === fiscalData.ubicacion)?.label || fiscalData.ubicacion;
+    
+    const message = `Hola, me gustaría una orientación fiscal. Esta es mi situación:
 
-    const message = `Hola, me gustaría que me aconsejes sobre mi situación fiscal. Esta es mi información:
-- Ventas Netas: $${fiscalData.ventasNetas || 'No especificado'}
-- Compras Netas: $${fiscalData.comprasNetas || 'No especificado'}
-- Actividad: ${fiscalData.actividad || 'No especificada'}
-- Categoría Monotributo: ${categoriaLabel || 'No especificada'}
-- Ubicación: ${ubicacionLabel || 'No especificada'}
+**Ventas Netas Mensuales:** ${fiscalData.ventasNetas ? `$${fiscalData.ventasNetas}` : 'No especificado'}
+**Compras Netas Mensuales:** ${fiscalData.comprasNetas ? `$${fiscalData.comprasNetas}` : 'No especificado'}
+**Actividad:** ${fiscalData.actividad || 'No especificado'}
+**Categoría Monotributo:** ${categoriaLabel || 'No especificado'}
+**Ubicación:** ${ubicacionLabel || 'No especificado'}
 
-¿Qué me puedes aconsejar?`;
-
+¿Qué me podés aconsejar sobre mis obligaciones tributarias?`;
+    
     onSendToChat(message);
-    setShowInscriptoModal(false);
   };
 
   const hasAnyData = Object.values(fiscalData).some(v => v.trim() !== '');
@@ -172,29 +151,119 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
   const hasNoInscriptoData = noInscriptoData.descripcion.trim() !== '' || noInscriptoData.tipoNegocio !== '';
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-zinc-900/80 backdrop-blur-sm text-zinc-100 h-full">
+    <div className="h-full flex flex-col p-4 bg-gradient-to-b from-zinc-900 to-zinc-950">
       {/* Header */}
-      <div className="text-center space-y-1">
-        <h3 className="text-sm font-bold text-white">Tu Situación Fiscal</h3>
-        <p className="text-[10px] text-zinc-500">Seleccioná una opción para comenzar</p>
+      <div className="mb-4">
+        <h2 className="text-sm font-bold text-zinc-200 mb-1">Datos Fiscales</h2>
+        <p className="text-[10px] text-zinc-500 leading-relaxed">
+          Completá tus datos para recibir asesoramiento personalizado
+        </p>
       </div>
 
-      {/* Botón Ya Inscripto */}
+      {/* Formulario */}
+      <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+        {/* Ventas Netas */}
+        <div className="space-y-1">
+          <label className="flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase tracking-wider">
+            <DollarSign className="w-3 h-3" />
+            Ventas Netas Mensuales
+          </label>
+          <div className="relative">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
+            <input
+              type="text"
+              value={fiscalData.ventasNetas}
+              onChange={(e) => handleChange('ventasNetas', formatCurrency(e.target.value))}
+              placeholder="0"
+              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-6 pr-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 focus:border-salta-bordo/50 placeholder:text-zinc-600 transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Compras Netas */}
+        <div className="space-y-1">
+          <label className="flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase tracking-wider">
+            <ShoppingCart className="w-3 h-3" />
+            Compras Netas Mensuales
+          </label>
+          <div className="relative">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
+            <input
+              type="text"
+              value={fiscalData.comprasNetas}
+              onChange={(e) => handleChange('comprasNetas', formatCurrency(e.target.value))}
+              placeholder="0"
+              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-6 pr-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 focus:border-salta-bordo/50 placeholder:text-zinc-600 transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Actividad */}
+        <div className="space-y-1">
+          <label className="flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase tracking-wider">
+            <Briefcase className="w-3 h-3" />
+            Actividad
+          </label>
+          <input
+            type="text"
+            value={fiscalData.actividad}
+            onChange={(e) => handleChange('actividad', e.target.value)}
+            placeholder="Ej: Venta de ropa"
+            className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 focus:border-salta-bordo/50 placeholder:text-zinc-600 transition-all"
+          />
+        </div>
+
+        {/* Categoría Monotributo */}
+        <div className="space-y-1">
+          <label className="flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase tracking-wider">
+            <Tag className="w-3 h-3" />
+            Categoría Monotributo
+          </label>
+          <select
+            value={fiscalData.categoriaMonotributo}
+            onChange={(e) => handleChange('categoriaMonotributo', e.target.value)}
+            className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 focus:border-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer transition-all"
+          >
+            {categoriasMonotributo.map((cat) => (
+              <option key={cat.value} value={cat.value} className="bg-zinc-800">
+                {cat.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Ubicación */}
+        <div className="space-y-1">
+          <label className="flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase tracking-wider">
+            <MapPin className="w-3 h-3" />
+            Ubicación
+          </label>
+          <select
+            value={fiscalData.ubicacion}
+            onChange={(e) => handleChange('ubicacion', e.target.value)}
+            className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 focus:border-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer transition-all"
+          >
+            {provincias.map((prov) => (
+              <option key={prov.value} value={prov.value} className="bg-zinc-800">
+                {prov.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Botón Enviar */}
       <button
-        onClick={() => setShowInscriptoModal(true)}
-        className="flex flex-col items-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white p-4 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] group"
+        onClick={handleSubmit}
+        disabled={!hasAnyData}
+        className="mt-4 flex items-center justify-center gap-2 bg-salta-bordo hover:bg-salta-bordo/80 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium py-2.5 px-3 rounded-lg text-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
       >
-        <div className="w-10 h-10 rounded-full bg-salta-bordo/20 flex items-center justify-center group-hover:bg-salta-bordo/30 transition-colors">
-          <ClipboardCheck className="w-5 h-5 text-salta-bordo" />
-        </div>
-        <div className="text-center">
-          <span className="text-xs font-semibold block">Ya estoy inscripto</span>
-          <span className="text-[10px] text-zinc-500">Cargar mis datos fiscales</span>
-        </div>
+        <Send className="w-3.5 h-3.5" />
+        Consultar al Experto
       </button>
 
       {/* Separador */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 my-3">
         <div className="flex-1 h-px bg-zinc-700" />
         <span className="text-[9px] text-zinc-500 uppercase">o</span>
         <div className="flex-1 h-px bg-zinc-700" />
@@ -203,148 +272,11 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
       {/* Botón No Inscripto */}
       <button
         onClick={() => setShowNoInscriptoModal(true)}
-        className="flex flex-col items-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white p-4 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] group"
+        className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 hover:text-white font-medium py-2.5 px-3 rounded-lg text-xs transition-all"
       >
-        <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
-          <UserPlus className="w-5 h-5 text-amber-400" />
-        </div>
-        <div className="text-center">
-          <span className="text-xs font-semibold block">No estoy inscripto</span>
-          <span className="text-[10px] text-zinc-500">Necesito orientación</span>
-        </div>
+        <HelpCircle className="w-3.5 h-3.5" />
+        ¿No estás inscripto?
       </button>
-
-      {/* Instrucciones */}
-      <div className="mt-auto bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
-        <p className="text-[10px] text-zinc-400 text-center leading-relaxed">
-          Completá tus datos y luego acercate a un personaje en el juego para consultar con el experto correspondiente.
-        </p>
-      </div>
-
-      {/* Modal Ya Inscripto */}
-      {showInscriptoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl w-[90%] max-w-md max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-zinc-700">
-              <div className="flex items-center gap-2">
-                <ClipboardCheck className="w-5 h-5 text-salta-bordo" />
-                <h3 className="text-sm font-bold text-white">Mis Datos Fiscales</h3>
-              </div>
-              <button
-                onClick={() => setShowInscriptoModal(false)}
-                className="p-1 hover:bg-zinc-700 rounded-md transition-colors"
-              >
-                <X className="w-4 h-4 text-zinc-400" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-4 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {/* Ventas Netas */}
-                <div className="space-y-1">
-                  <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-                    <DollarSign className="w-3 h-3" />
-                    Ventas Netas
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
-                    <input
-                      type="text"
-                      value={fiscalData.ventasNetas}
-                      onChange={(e) => handleCurrencyChange('ventasNetas', e.target.value)}
-                      placeholder="0"
-                      className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 placeholder:text-zinc-600"
-                    />
-                  </div>
-                </div>
-
-                {/* Compras Netas */}
-                <div className="space-y-1">
-                  <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-                    <ShoppingCart className="w-3 h-3" />
-                    Compras Netas
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
-                    <input
-                      type="text"
-                      value={fiscalData.comprasNetas}
-                      onChange={(e) => handleCurrencyChange('comprasNetas', e.target.value)}
-                      placeholder="0"
-                      className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 placeholder:text-zinc-600"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Actividad */}
-              <div className="space-y-1">
-                <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-                  <Briefcase className="w-3 h-3" />
-                  Actividad
-                </label>
-                <input
-                  type="text"
-                  value={fiscalData.actividad}
-                  onChange={(e) => handleChange('actividad', e.target.value)}
-                  placeholder="Ej: Desarrollador de software, Comercio minorista..."
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 placeholder:text-zinc-600"
-                />
-              </div>
-
-              {/* Categoría Monotributo */}
-              <div className="space-y-1">
-                <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-                  <Tag className="w-3 h-3" />
-                  Categoría Monotributo
-                </label>
-                <select
-                  value={fiscalData.categoriaMonotributo}
-                  onChange={(e) => handleChange('categoriaMonotributo', e.target.value)}
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer"
-                >
-                  {categoriasMonotributo.map((cat) => (
-                    <option key={cat.value} value={cat.value} className="bg-zinc-800">
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Ubicación */}
-              <div className="space-y-1">
-                <label className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  Ubicación
-                </label>
-                <select
-                  value={fiscalData.ubicacion}
-                  onChange={(e) => handleChange('ubicacion', e.target.value)}
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-salta-bordo/50 text-zinc-300 appearance-none cursor-pointer"
-                >
-                  {provinciasArgentina.map((prov) => (
-                    <option key={prov.value} value={prov.value} className="bg-zinc-800">
-                      {prov.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Botón Enviar */}
-              <button
-                onClick={handleSubmit}
-                disabled={!hasAnyData}
-                className="w-full flex items-center justify-center gap-2 bg-salta-bordo hover:bg-salta-bordo/80 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg text-sm transition-all hover:scale-[1.01] active:scale-[0.99]"
-              >
-                <Send className="w-4 h-4" />
-                Consultar al Experto
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal No Inscripto */}
       {showNoInscriptoModal && (
@@ -380,7 +312,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                   onChange={(e) => handleNoInscriptoChange('descripcion', e.target.value)}
                   placeholder="Ej: Tengo un emprendimiento de venta de ropa por Instagram, trabajo desde mi casa..."
                   rows={3}
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 placeholder:text-zinc-600 resize-none"
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 placeholder:text-zinc-600 resize-none"
                 />
               </div>
 
@@ -392,7 +324,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                 <select
                   value={noInscriptoData.tipoNegocio}
                   onChange={(e) => handleNoInscriptoChange('tipoNegocio', e.target.value)}
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
                 >
                   {tiposNegocio.map((tipo) => (
                     <option key={tipo.value} value={tipo.value} className="bg-zinc-800">
@@ -415,7 +347,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                       value={noInscriptoData.ingresoEstimado}
                       onChange={(e) => handleNoInscriptoChange('ingresoEstimado', formatCurrency(e.target.value))}
                       placeholder="0"
-                      className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 placeholder:text-zinc-600"
+                      className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg pl-5 pr-2 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 placeholder:text-zinc-600"
                     />
                   </div>
                 </div>
@@ -428,7 +360,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                   <select
                     value={noInscriptoData.empleados}
                     onChange={(e) => handleNoInscriptoChange('empleados', e.target.value)}
-                    className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
+                    className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
                   >
                     <option value="" className="bg-zinc-800">Seleccionar...</option>
                     <option value="0" className="bg-zinc-800">Solo yo</option>
@@ -447,7 +379,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                 <select
                   value={noInscriptoData.localFisico}
                   onChange={(e) => handleNoInscriptoChange('localFisico', e.target.value)}
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
+                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-zinc-300 appearance-none cursor-pointer"
                 >
                   <option value="" className="bg-zinc-800">Seleccionar...</option>
                   <option value="no" className="bg-zinc-800">No, trabajo desde casa / virtual</option>
@@ -471,7 +403,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
                         key={npc.key}
                         onClick={() => handleSendToNpc(npc.key)}
                         disabled={!hasNoInscriptoData}
-                        className={`${npc.color} ${npc.hoverColor} disabled:bg-zinc-700 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col items-center gap-1`}
+                        className={`${npc.color} ${npc.hoverColor} disabled:bg-zinc-700 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-all hover:scale-[1.02] active:scale-[0.98] flex flex-col items-center gap-1.5`}
                       >
                         <Icon className="w-5 h-5" />
                         <span className="text-[10px] font-medium">{npc.name}</span>
