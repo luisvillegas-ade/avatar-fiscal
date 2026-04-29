@@ -68,7 +68,26 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
   return (
     <div className="flex flex-col h-full bg-zinc-950 text-zinc-100 border-l border-zinc-800">
       
-      {/* El NPC se selecciona caminando hacia los personajes en el juego */}
+      {/* Selector de NPCs */}
+      <div className="flex w-full bg-zinc-900 border-b border-zinc-800">
+        {(Object.keys(npcConfig) as NpcRole[]).map((key) => {
+          const isActive = activeNpc === key;
+          const config = npcConfig[key];
+          const Icon = config.icon;
+          return (
+            <button
+              key={key}
+              onClick={() => setActiveNpc(key)}
+              className={`flex-1 flex flex-col items-center justify-center p-2 text-xs font-medium transition-all duration-300 border-b-2
+                ${isActive ? `${config.text} bg-zinc-800/50 ${config.border}` : 'text-zinc-500 border-transparent hover:bg-zinc-800/30'}
+              `}
+            >
+              <Icon className={`w-4 h-4 mb-1 ${isActive ? '' : 'opacity-50'}`} />
+              {config.name}
+            </button>
+          )
+        })}
+      </div>
 
       <div className="p-3 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between transition-colors duration-500">
         <div className="flex items-center gap-2">
