@@ -77,14 +77,22 @@ export default function Home() {
         </div>
 
         {/* Panel Inferior */}
-        <div className="h-10 bg-zinc-900/90 border-t border-zinc-800 flex items-center justify-between px-4">
-          <div className="flex items-center gap-4 text-[10px] text-zinc-500">
-            <span>WASD o Flechas para moverse</span>
-            <span className="text-zinc-700">|</span>
-            <span>ESPACIO para interactuar</span>
+        <div className="h-14 bg-zinc-900/90 border-t border-zinc-800 flex flex-col justify-center px-4 gap-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-[10px] text-zinc-500">
+              <span>WASD o Flechas para moverse</span>
+              <span className="text-zinc-700">|</span>
+              <span>ESPACIO para interactuar</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[9px] font-semibold rounded uppercase tracking-wide">Beta</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-[10px] text-zinc-600">
-            <span>Completa tus datos fiscales a la izquierda</span>
+          <div className="flex items-center justify-center gap-2 text-[9px] text-zinc-500">
+            <span className="text-amber-500/70">Aviso:</span>
+            <span>Este simulador es orientativo y de ninguna forma sustituye el asesoramiento de un contador profesional.</span>
+            <span className="text-zinc-600">|</span>
+            <span className="font-medium text-zinc-400">Siempre consulte con un contador matriculado.</span>
           </div>
         </div>
       </div>
