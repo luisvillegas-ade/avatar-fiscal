@@ -38,6 +38,99 @@
                     DataManager.setupNewGame();
                     SceneManager.goto(Scene_Map);
                 };
+
+                // 3. Listener para control de audio desde el padre (Next.js)
+                var savedMasterVolume = 1;
+                window.addEventListener('message', function(event) {
+                    if (event.data && event.data.type === 'TOGGLE_AUDIO') {
+                        if (typeof AudioManager !== 'undefined') {
+                            if (event.data.muted) {
+                                // Guardar volumen actual y silenciar
+                                savedMasterVolume = AudioManager.masterVolume;
+                                AudioManager.masterVolume = 0;
+                                // También detener BGM actual
+                                if (AudioManager._bgmBuffer) {
+                                    AudioManager._bgmBuffer.stop();
+                                }
+                                if (AudioManager._bgsBuffer) {
+                                    AudioManager._bgsBuffer.stop();
+                                }
+                            } else {
+                                // Restaurar volumen
+                                AudioManager.masterVolume = savedMasterVolume || 1;
+                                // Reanudar BGM si había uno
+                                if (AudioManager._currentBgm) {
+                                    AudioManager.playBgm(AudioManager._currentBgm);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // 4. Iniciar con audio silenciado por defecto
+                var _AudioManager_playBgm = null;
+                var _audioInitialized = false;
+                document.addEventListener('DOMContentLoaded', function() {
+                    var checkAudio = setInterval(function() {
+                        if (typeof AudioManager !== 'undefined' && !_audioInitialized) {
+                            _audioInitialized = true;
+                            AudioManager.masterVolume = 0;
+                            clearInterval(checkAudio);
+                        }
+                    }, 100);
+                });
+
+                // 5. Detección de proximidad a NPCs - enviar LEAVE_NPC cuando se aleja
+                var _currentActiveNpc = null;
+                var _npcPositions = {
+                    'arca': { x: 19, y: 8 },
+                    'dgr': { x: 29, y: 8 },
+                    'muni': { x: 10, y: 8 }
+                };
+                var _proximityDistance = 2; // Distancia en tiles para considerar "cerca"
+
+                // Sobrescribir el postMessage original para trackear el NPC activo
+                var _originalPostMessage = window.parent.postMessage.bind(window.parent);
+                window.parent.postMessage = function(data, origin) {
+                    if (data && data.type === 'CHANGE_NPC' && data.role) {
+                        _currentActiveNpc = data.role;
+                    }
+                    _originalPostMessage(data, origin);
+                };
+
+                // Verificar proximidad cuando el jugador se mueve
+                var _checkProximityInitialized = false;
+                document.addEventListener('DOMContentLoaded', function() {
+                    var checkGame = setInterval(function() {
+                        if (typeof Game_Player !== 'undefined' && !_checkProximityInitialized) {
+                            _checkProximityInitialized = true;
+                            
+                            // Sobrescribir el método de movimiento del jugador
+                            var _Game_Player_moveStraight = Game_Player.prototype.moveStraight;
+                            Game_Player.prototype.moveStraight = function(d) {
+                                _Game_Player_moveStraight.call(this, d);
+                                
+                                // Si hay un NPC activo, verificar si el jugador se alejó
+                                if (_currentActiveNpc && $gamePlayer) {
+                                    var playerX = $gamePlayer.x;
+                                    var playerY = $gamePlayer.y;
+                                    var npcPos = _npcPositions[_currentActiveNpc];
+                                    
+                                    if (npcPos) {
+                                        var distance = Math.abs(playerX - npcPos.x) + Math.abs(playerY - npcPos.y);
+                                        if (distance > _proximityDistance) {
+                                            // El jugador se alejó del NPC
+                                            window.parent.postMessage({ type: 'LEAVE_NPC' }, '*');
+                                            _currentActiveNpc = null;
+                                        }
+                                    }
+                                }
+                            };
+                            
+                            clearInterval(checkGame);
+                        }
+                    }, 100);
+                });
             })();
         </script>
     </body>
