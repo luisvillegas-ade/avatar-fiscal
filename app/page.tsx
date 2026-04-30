@@ -4,12 +4,14 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import AvatarPanel, { AvatarPanelRef } from '@/components/AvatarPanel';
 import FiscalDataPanel from '@/components/FiscalDataPanel';
 import TutorialOverlay from '@/components/TutorialOverlay';
+import DocumentationModal from '@/components/DocumentationModal';
 
 export default function Home() {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [tutorialComplete, setTutorialComplete] = useState(false);
   const [isMuted, setIsMuted] = useState(true); // Inicia muteado por defecto
   const [activeNpc, setActiveNpc] = useState<'arca' | 'dgr' | 'muni' | null>(null);
+  const [showDocs, setShowDocs] = useState(false);
   const avatarPanelRef = useRef<AvatarPanelRef>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
