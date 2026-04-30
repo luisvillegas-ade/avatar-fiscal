@@ -59,19 +59,7 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
-  useEffect(() => {
-    // Check if user has accepted disclaimers and seen tutorial before
-    const hasAcceptedDisclaimer = localStorage.getItem('avatarFiscal_disclaimerAccepted');
-    const hasSeenTutorial = localStorage.getItem('avatarFiscal_tutorialSeen');
-    
-    if (hasAcceptedDisclaimer && hasSeenTutorial) {
-      setIsVisible(false);
-      onComplete();
-    } else if (hasAcceptedDisclaimer) {
-      setShowDisclaimer(false);
-      setShowWelcome(true);
-    }
-  }, [onComplete]);
+  // No se guarda en localStorage - siempre mostrar términos y condiciones al inicio de cada sesión
 
   const handleNext = () => {
     if (currentStep < tutorialSteps.length - 1) {
@@ -88,7 +76,6 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
   };
 
   const handleComplete = () => {
-    localStorage.setItem('avatarFiscal_tutorialSeen', 'true');
     setIsVisible(false);
     onComplete();
   };
@@ -98,7 +85,6 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
   };
 
   const handleAcceptDisclaimer = () => {
-    localStorage.setItem('avatarFiscal_disclaimerAccepted', 'true');
     setShowDisclaimer(false);
     setShowWelcome(true);
   };
