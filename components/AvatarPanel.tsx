@@ -3,7 +3,7 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { Send, Bot, Loader2, AlertCircle, Building2, Landmark, ShieldCheck } from 'lucide-react';
+import { Send, Bot, Loader2, AlertCircle, Building2, Landmark, ShieldCheck, Newspaper } from 'lucide-react';
 
 type NpcRole = 'arca' | 'dgr' | 'muni';
 
@@ -22,6 +22,7 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
   const [input, setInput] = useState('');
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
   const [activeNpc, setActiveNpc] = useState<NpcRole>('arca');
+  const [showNewsConfirm, setShowNewsConfirm] = useState(false);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -69,6 +70,12 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
     setInput('');
   };
 
+  const handleRequestNews = () => {
+    const npcName = npcConfig[activeNpc].name;
+    handleSendMessage(`Hola, ¿podrías contarme las últimas noticias, novedades o cambios recientes relacionados con ${npcName}? Me interesa estar al tanto de cualquier actualización importante sobre trámites, vencimientos, nuevas regulaciones o cambios en los procedimientos.`);
+    setShowNewsConfirm(false);
+  };
+
   return (
     <div className="flex flex-col h-full bg-zinc-950 text-zinc-100 border-l border-zinc-800">
       
@@ -93,7 +100,7 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
         })}
       </div>
 
-      <div className="p-2.5 border-b border-zinc-700 bg-zinc-800 sticky top-0 z-10 flex items-center transition-colors duration-300">
+      <div className="p-2.5 border-b border-zinc-700 bg-zinc-800 sticky top-0 z-10 flex items-center justify-between transition-colors duration-300">
         <div className="flex items-center gap-2">
           <div className={`w-8 h-8 rounded-full ${npcConfig[activeNpc].color} flex items-center justify-center shadow-md transition-colors duration-300`}>
             {(() => {
@@ -109,7 +116,48 @@ const AvatarPanel = forwardRef<AvatarPanelRef>(function AvatarPanel(_, ref) {
             </div>
           </div>
         </div>
+        <button
+          onClick={() => setShowNewsConfirm(true)}
+          className={`flex items-center gap-1 px-2 py-1 ${npcConfig[activeNpc].color} hover:opacity-90 text-white text-[10px] font-medium rounded-md transition-all hover:scale-105 active:scale-95`}
+          title="Consultar últimas noticias"
+        >
+          <Newspaper className="w-3 h-3" />
+          <span className="hidden sm:inline">Noticias</span>
+        </button>
       </div>
+
+      {/* Modal de confirmación de noticias */}
+      {showNewsConfirm && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 mx-4 max-w-[280px] shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className={`w-10 h-10 rounded-full ${npcConfig[activeNpc].color} flex items-center justify-center`}>
+                <Newspaper className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-white mb-1">Consultar Noticias</h3>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  ¿Querés que {npcConfig[activeNpc].name} te cuente las últimas novedades y actualizaciones del organismo?
+                </p>
+              </div>
+              <div className="flex gap-2 w-full mt-1">
+                <button
+                  onClick={() => setShowNewsConfirm(false)}
+                  className="flex-1 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-lg transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleRequestNews}
+                  className={`flex-1 px-3 py-2 ${npcConfig[activeNpc].color} hover:opacity-90 text-white text-xs font-medium rounded-lg transition-all`}
+                >
+                  Consultar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.length === 0 && !errorLocal && (
