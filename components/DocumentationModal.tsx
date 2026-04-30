@@ -228,9 +228,9 @@ function TechnicalDocs() {
           <TechCard name="Next.js 15" description="Framework React con App Router" />
           <TechCard name="TypeScript" description="Tipado estático" />
           <TechCard name="Tailwind CSS" description="Estilos utilitarios" />
-          <TechCard name="Vercel AI SDK" description="Integración con modelos de IA" />
+          <TechCard name="Vercel AI SDK 6" description="Streaming, tools y agentes" />
+          <TechCard name="Context7 MCP" description="Documentación fiscal actualizada" />
           <TechCard name="RPG Maker MV" description="Motor del juego 2D" />
-          <TechCard name="Lucide Icons" description="Iconografía" />
         </div>
       </section>
 
@@ -260,25 +260,51 @@ function TechnicalDocs() {
         </div>
       </section>
 
+      {/* Context7 MCP */}
+      <section>
+        <h3 className="text-lg font-bold text-white mb-3">Integración Context7 MCP</h3>
+        <p className="text-sm text-zinc-300 leading-relaxed mb-4">
+          Avatar Fiscal utiliza Context7 MCP (Model Context Protocol) para proporcionar a los asesores 
+          virtuales acceso a documentación fiscal actualizada. Esto permite respuestas más precisas y 
+          actuales sobre regulaciones, vencimientos y procedimientos.
+        </p>
+        <div className="space-y-2 mb-4">
+          <MessageDoc 
+            type="searchFiscalDocumentation" 
+            direction="Tool"
+            description="Busca documentación fiscal actualizada según el organismo (ARCA, DGR, Muni) y la consulta del usuario."
+          />
+          <MessageDoc 
+            type="getVencimientos" 
+            direction="Tool"
+            description="Obtiene información sobre próximos vencimientos fiscales según el organismo y tipo de tributo."
+          />
+        </div>
+        <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+          <p className="text-xs text-blue-400">
+            Las herramientas de Context7 MCP se ejecutan automáticamente cuando el modelo de IA 
+            determina que necesita información actualizada para responder una consulta.
+          </p>
+        </div>
+      </section>
+
       {/* API */}
       <section>
         <h3 className="text-lg font-bold text-white mb-3">API de Chat</h3>
         <p className="text-sm text-zinc-300 leading-relaxed mb-4">
           El endpoint <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-xs">/api/chat</code> maneja 
-          las conversaciones con los asesores virtuales. Utiliza el Vercel AI SDK con streaming.
+          las conversaciones con los asesores virtuales. Utiliza el Vercel AI SDK 6 con streaming y tools.
         </p>
         <div className="bg-zinc-800 rounded-lg p-4 font-mono text-xs text-zinc-300">
-          <pre>{`// Ejemplo de request
+          <pre>{`// API con Context7 MCP Tools
 POST /api/chat
-{
-  "messages": [
-    { "role": "user", "content": "..." }
-  ]
-}
 
-// El sistema detecta el rol del NPC
-// basándose en el prefijo [ROLE:xxx]
-// al inicio del primer mensaje`}</pre>
+// Tools disponibles:
+// - searchFiscalDocumentation
+// - getVencimientos
+
+// El modelo decide cuándo usar las 
+// herramientas para obtener info actualizada`}</pre>
         </div>
       </section>
 

@@ -1047,6 +1047,9 @@ video {
   --tw-border-opacity: 1;
   border-color: rgb(39 39 42 / var(--tw-border-opacity, 1));
 }
+.border-blue-500\/30 {
+  border-color: rgb(59 130 246 / 0.3);
+}
 .border-t-transparent {
   border-top-color: transparent;
 }
@@ -1137,6 +1140,9 @@ video {
 }
 .bg-zinc-950\/90 {
   background-color: rgb(9 9 11 / 0.9);
+}
+.bg-blue-500\/10 {
+  background-color: rgb(59 130 246 / 0.1);
 }
 .bg-gradient-to-b {
   background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
@@ -1295,6 +1301,9 @@ video {
 .uppercase {
   text-transform: uppercase;
 }
+.italic {
+  font-style: italic;
+}
 .leading-normal {
   line-height: 1.5;
 }
@@ -1368,6 +1377,10 @@ video {
 .text-zinc-700 {
   --tw-text-opacity: 1;
   color: rgb(63 63 70 / var(--tw-text-opacity, 1));
+}
+.text-blue-400 {
+  --tw-text-opacity: 1;
+  color: rgb(96 165 250 / var(--tw-text-opacity, 1));
 }
 .antialiased {
   -webkit-font-smoothing: antialiased;
