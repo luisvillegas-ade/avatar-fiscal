@@ -79,6 +79,58 @@
                         }
                     }, 100);
                 });
+
+                // 5. Detección de proximidad a NPCs - enviar LEAVE_NPC cuando se aleja
+                var _currentActiveNpc = null;
+                var _npcPositions = {
+                    'arca': { x: 19, y: 8 },
+                    'dgr': { x: 29, y: 8 },
+                    'muni': { x: 10, y: 8 }
+                };
+                var _proximityDistance = 2; // Distancia en tiles para considerar "cerca"
+
+                // Sobrescribir el postMessage original para trackear el NPC activo
+                var _originalPostMessage = window.parent.postMessage.bind(window.parent);
+                window.parent.postMessage = function(data, origin) {
+                    if (data && data.type === 'CHANGE_NPC' && data.role) {
+                        _currentActiveNpc = data.role;
+                    }
+                    _originalPostMessage(data, origin);
+                };
+
+                // Verificar proximidad cuando el jugador se mueve
+                var _checkProximityInitialized = false;
+                document.addEventListener('DOMContentLoaded', function() {
+                    var checkGame = setInterval(function() {
+                        if (typeof Game_Player !== 'undefined' && !_checkProximityInitialized) {
+                            _checkProximityInitialized = true;
+                            
+                            // Sobrescribir el método de movimiento del jugador
+                            var _Game_Player_moveStraight = Game_Player.prototype.moveStraight;
+                            Game_Player.prototype.moveStraight = function(d) {
+                                _Game_Player_moveStraight.call(this, d);
+                                
+                                // Si hay un NPC activo, verificar si el jugador se alejó
+                                if (_currentActiveNpc && $gamePlayer) {
+                                    var playerX = $gamePlayer.x;
+                                    var playerY = $gamePlayer.y;
+                                    var npcPos = _npcPositions[_currentActiveNpc];
+                                    
+                                    if (npcPos) {
+                                        var distance = Math.abs(playerX - npcPos.x) + Math.abs(playerY - npcPos.y);
+                                        if (distance > _proximityDistance) {
+                                            // El jugador se alejó del NPC
+                                            window.parent.postMessage({ type: 'LEAVE_NPC' }, '*');
+                                            _currentActiveNpc = null;
+                                        }
+                                    }
+                                }
+                            };
+                            
+                            clearInterval(checkGame);
+                        }
+                    }, 100);
+                });
             })();
         </script>
     </body>
