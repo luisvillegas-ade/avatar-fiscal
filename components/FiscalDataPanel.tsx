@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, DollarSign, ShoppingCart, Briefcase, MapPin, Tag, HelpCircle, X, ShieldCheck, Landmark, Building2 } from 'lucide-react';
+import { Send, DollarSign, ShoppingCart, Briefcase, MapPin, Tag, HelpCircle, X, ShieldCheck, Landmark, Building2, FileText, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface FiscalData {
   ventasNetas: string;
@@ -100,6 +100,17 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc, activeNpc }
   });
 
   const [showNoInscriptoModal, setShowNoInscriptoModal] = useState(false);
+  const [showReporteModal, setShowReporteModal] = useState(false);
+  const [workflowLoading, setWorkflowLoading] = useState(false);
+  const [workflowError, setWorkflowError] = useState<string | null>(null);
+  const [reporteCompleto, setReporteCompleto] = useState<{
+    resumen: string;
+    analisisArca: { organismo: string; obligaciones: string[]; recomendaciones: string[]; alertas: string[] };
+    analisisDgr: { organismo: string; obligaciones: string[]; recomendaciones: string[]; alertas: string[] };
+    analisisMuni: { organismo: string; obligaciones: string[]; recomendaciones: string[]; alertas: string[] };
+    proximosPasos: string[];
+    fechaAnalisis: string;
+  } | null>(null);
   const [noInscriptoData, setNoInscriptoData] = useState({
     descripcion: '',
     tipoNegocio: '',
@@ -176,6 +187,34 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc, activeNpc }
   };
 
   const hasNoInscriptoData = noInscriptoData.descripcion.trim() !== '' || noInscriptoData.tipoNegocio !== '';
+
+  // Ejecutar workflow de análisis fiscal completo
+  const handleAnalisisCompleto = async () => {
+    setWorkflowLoading(true);
+    setWorkflowError(null);
+    setReporteCompleto(null);
+    
+    try {
+      const response = await fetch('/api/workflow/analisis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fiscalData),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.resultado) {
+        setReporteCompleto(data.resultado);
+        setShowReporteModal(true);
+      } else {
+        setWorkflowError(data.error || 'Error al generar el análisis');
+      }
+    } catch (error) {
+      setWorkflowError('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setWorkflowLoading(false);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col p-4 bg-gradient-to-b from-zinc-900 to-zinc-950 relative">
@@ -326,15 +365,41 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc, activeNpc }
         </div>
       </div>
 
-      {/* Botón Enviar */}
-      <button
-        onClick={handleSubmit}
-        disabled={!hasAnyData || !isNpcActive}
-        className="mt-4 flex items-center justify-center gap-2 bg-salta-bordo hover:bg-salta-bordo/80 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium py-2.5 px-3 rounded-lg text-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
-      >
-        <Send className="w-3.5 h-3.5" />
-        Consultar al Experto
-      </button>
+      {/* Botones de acción */}
+      <div className="mt-4 space-y-2">
+        {/* Botón Consultar al Experto */}
+        <button
+          onClick={handleSubmit}
+          disabled={!hasAnyData || !isNpcActive}
+          className="w-full flex items-center justify-center gap-2 bg-salta-bordo hover:bg-salta-bordo/80 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium py-2.5 px-3 rounded-lg text-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <Send className="w-3.5 h-3.5" />
+          Consultar al Experto
+        </button>
+
+        {/* Botón Análisis Completo (Workflow) */}
+        <button
+          onClick={handleAnalisisCompleto}
+          disabled={!hasAnyData || workflowLoading}
+          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-zinc-700 disabled:to-zinc-700 disabled:cursor-not-allowed text-white font-medium py-2.5 px-3 rounded-lg text-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          {workflowLoading ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              Analizando con Workflow...
+            </>
+          ) : (
+            <>
+              <FileText className="w-3.5 h-3.5" />
+              Análisis Completo (3 Organismos)
+            </>
+          )}
+        </button>
+        
+        {workflowError && (
+          <p className="text-[10px] text-red-400 text-center">{workflowError}</p>
+        )}
+      </div>
 
       {/* Separador */}
       <div className="flex items-center gap-2 my-3">
@@ -352,6 +417,128 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc, activeNpc }
         <HelpCircle className="w-3.5 h-3.5" />
         ¿No estás inscripto?
       </button>
+
+      {/* Modal Reporte Completo (Workflow) */}
+      {showReporteModal && reporteCompleto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-zinc-700 bg-gradient-to-r from-blue-600/20 to-purple-600/20">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-400" />
+                <h3 className="text-sm font-bold text-white">Reporte Fiscal Completo</h3>
+                <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 text-[9px] font-medium rounded-full">
+                  Powered by Workflow
+                </span>
+              </div>
+              <button
+                onClick={() => setShowReporteModal(false)}
+                className="p-1 hover:bg-zinc-700 rounded-md transition-colors"
+              >
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* Resumen */}
+              <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
+                <p className="text-xs text-zinc-300 leading-relaxed">{reporteCompleto.resumen}</p>
+              </div>
+
+              {/* Análisis por Organismo */}
+              {[reporteCompleto.analisisArca, reporteCompleto.analisisDgr, reporteCompleto.analisisMuni].map((analisis, idx) => {
+                const colors = [
+                  { bg: 'bg-[#722F37]/20', border: 'border-[#722F37]/50', text: 'text-[#e85a6b]' },
+                  { bg: 'bg-blue-700/20', border: 'border-blue-700/50', text: 'text-blue-400' },
+                  { bg: 'bg-emerald-700/20', border: 'border-emerald-700/50', text: 'text-emerald-400' },
+                ][idx];
+                const icons = [ShieldCheck, Landmark, Building2][idx];
+                const Icon = icons;
+                
+                return (
+                  <div key={analisis.organismo} className={`p-3 rounded-lg border ${colors.bg} ${colors.border}`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Icon className={`w-4 h-4 ${colors.text}`} />
+                      <h4 className={`text-xs font-bold ${colors.text}`}>{analisis.organismo}</h4>
+                    </div>
+                    
+                    {analisis.obligaciones.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-[10px] text-zinc-500 uppercase mb-1">Obligaciones</p>
+                        <ul className="space-y-1">
+                          {analisis.obligaciones.map((ob, i) => (
+                            <li key={i} className="text-[11px] text-zinc-300 flex items-start gap-1.5">
+                              <span className="text-zinc-500 mt-0.5">•</span>
+                              {ob}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {analisis.recomendaciones.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-[10px] text-zinc-500 uppercase mb-1">Recomendaciones</p>
+                        <ul className="space-y-1">
+                          {analisis.recomendaciones.map((rec, i) => (
+                            <li key={i} className="text-[11px] text-zinc-300 flex items-start gap-1.5">
+                              <CheckCircle className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
+                              {rec}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {analisis.alertas.length > 0 && (
+                      <div>
+                        <p className="text-[10px] text-zinc-500 uppercase mb-1">Alertas</p>
+                        <ul className="space-y-1">
+                          {analisis.alertas.map((al, i) => (
+                            <li key={i} className="text-[11px] text-amber-300 flex items-start gap-1.5">
+                              <AlertTriangle className="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" />
+                              {al}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Próximos Pasos */}
+              {reporteCompleto.proximosPasos.length > 0 && (
+                <div className="p-3 bg-zinc-800 rounded-lg border border-zinc-600">
+                  <h4 className="text-xs font-bold text-white mb-2 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Próximos Pasos
+                  </h4>
+                  <ol className="space-y-1.5">
+                    {reporteCompleto.proximosPasos.map((paso, i) => (
+                      <li key={i} className="text-[11px] text-zinc-300 flex items-start gap-2">
+                        <span className="w-4 h-4 rounded-full bg-zinc-700 text-zinc-400 flex items-center justify-center text-[9px] font-bold flex-shrink-0">
+                          {i + 1}
+                        </span>
+                        {paso}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-3 border-t border-zinc-700 bg-zinc-800/50">
+              <p className="text-[9px] text-zinc-500 text-center">
+                Análisis generado el {new Date(reporteCompleto.fechaAnalisis).toLocaleString('es-AR')} · 
+                Este reporte es orientativo. Consultá siempre con un contador matriculado.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal No Inscripto */}
       {showNoInscriptoModal && (

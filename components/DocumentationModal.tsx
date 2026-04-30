@@ -229,8 +229,44 @@ function TechnicalDocs() {
           <TechCard name="TypeScript" description="Tipado estático" />
           <TechCard name="Tailwind CSS" description="Estilos utilitarios" />
           <TechCard name="Vercel AI SDK 6" description="Streaming, tools y agentes" />
-          <TechCard name="Context7 MCP" description="Documentación fiscal actualizada" />
+          <TechCard name="Vercel Workflows" description="Análisis fiscal durable" />
           <TechCard name="RPG Maker MV" description="Motor del juego 2D" />
+        </div>
+      </section>
+
+      {/* Vercel Workflows */}
+      <section>
+        <h3 className="text-lg font-bold text-white mb-3">Vercel Workflows</h3>
+        <p className="text-sm text-zinc-300 leading-relaxed mb-4">
+          Avatar Fiscal integra Vercel Workflows para análisis fiscales durables y confiables. 
+          El workflow ejecuta análisis paralelos en los 3 organismos (ARCA, DGR, Municipalidad) 
+          y genera un reporte completo con obligaciones, recomendaciones y alertas.
+        </p>
+        
+        <div className="bg-zinc-800 rounded-lg p-4 font-mono text-xs text-zinc-300 mb-4">
+          <pre>{`// Workflow de Análisis Fiscal
+export async function analizarSituacionFiscal(datos) {
+  'use workflow';
+  
+  // Análisis paralelo de los 3 organismos
+  const [arca, dgr, muni] = await Promise.all([
+    analizarObligacionesArca(datos),
+    analizarObligacionesDgr(datos),
+    analizarObligacionesMuni(datos),
+  ]);
+  
+  // Generar resumen ejecutivo
+  const resumen = await generarResumenEjecutivo(...);
+  
+  return { arca, dgr, muni, resumen };
+}`}</pre>
+        </div>
+        
+        <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+          <p className="text-xs text-purple-400">
+            Los workflows son durables: si hay un error, se reintentan automáticamente. 
+            Cada paso (step) se ejecuta de forma aislada y sus resultados se persisten.
+          </p>
         </div>
       </section>
 
@@ -257,34 +293,6 @@ function TechnicalDocs() {
             direction="App → Juego"
             description="Controla el volumen del juego. Incluye el estado muted (true/false)."
           />
-        </div>
-      </section>
-
-      {/* Context7 MCP */}
-      <section>
-        <h3 className="text-lg font-bold text-white mb-3">Integración Context7 MCP</h3>
-        <p className="text-sm text-zinc-300 leading-relaxed mb-4">
-          Avatar Fiscal utiliza Context7 MCP (Model Context Protocol) para proporcionar a los asesores 
-          virtuales acceso a documentación fiscal actualizada. Esto permite respuestas más precisas y 
-          actuales sobre regulaciones, vencimientos y procedimientos.
-        </p>
-        <div className="space-y-2 mb-4">
-          <MessageDoc 
-            type="searchFiscalDocumentation" 
-            direction="Tool"
-            description="Busca documentación fiscal actualizada según el organismo (ARCA, DGR, Muni) y la consulta del usuario."
-          />
-          <MessageDoc 
-            type="getVencimientos" 
-            direction="Tool"
-            description="Obtiene información sobre próximos vencimientos fiscales según el organismo y tipo de tributo."
-          />
-        </div>
-        <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-          <p className="text-xs text-blue-400">
-            Las herramientas de Context7 MCP se ejecutan automáticamente cuando el modelo de IA 
-            determina que necesita información actualizada para responder una consulta.
-          </p>
         </div>
       </section>
 
