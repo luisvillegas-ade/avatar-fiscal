@@ -79,6 +79,7 @@ const npcButtons = [
 interface FiscalDataPanelProps {
   onSendToChat: (message: string) => void;
   onChangeNpc?: (npc: 'arca' | 'dgr' | 'muni') => void;
+  activeNpc: 'arca' | 'dgr' | 'muni' | null;
 }
 
 const formatCurrency = (value: string) => {
@@ -86,7 +87,8 @@ const formatCurrency = (value: string) => {
   return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
-export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDataPanelProps) {
+export default function FiscalDataPanel({ onSendToChat, onChangeNpc, activeNpc }: FiscalDataPanelProps) {
+  const isNpcActive = activeNpc !== null;
   const [fiscalData, setFiscalData] = useState<FiscalData>({
     ventasNetas: '',
     comprasNetas: '',
@@ -176,7 +178,20 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
   const hasNoInscriptoData = noInscriptoData.descripcion.trim() !== '' || noInscriptoData.tipoNegocio !== '';
 
   return (
-    <div className="h-full flex flex-col p-4 bg-gradient-to-b from-zinc-900 to-zinc-950">
+    <div className="h-full flex flex-col p-4 bg-gradient-to-b from-zinc-900 to-zinc-950 relative">
+      {/* Overlay cuando no hay NPC activo */}
+      {!isNpcActive && (
+        <div className="absolute inset-0 bg-zinc-950/90 z-10 flex flex-col items-center justify-center p-6">
+          <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-dashed border-zinc-600 mb-4">
+            <Briefcase className="w-8 h-8 text-zinc-500" />
+          </div>
+          <p className="text-sm font-medium text-zinc-300 text-center mb-2">Acercate a un asesor</p>
+          <p className="text-xs text-zinc-500 text-center leading-relaxed max-w-[200px]">
+            Primero caminá hacia un personaje en el juego para poder enviar tus datos fiscales
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-4">
         <h2 className="text-sm font-bold text-zinc-200 mb-1">Datos Fiscales</h2>
@@ -314,7 +329,7 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
       {/* Botón Enviar */}
       <button
         onClick={handleSubmit}
-        disabled={!hasAnyData}
+        disabled={!hasAnyData || !isNpcActive}
         className="mt-4 flex items-center justify-center gap-2 bg-salta-bordo hover:bg-salta-bordo/80 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium py-2.5 px-3 rounded-lg text-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
       >
         <Send className="w-3.5 h-3.5" />
@@ -331,7 +346,8 @@ export default function FiscalDataPanel({ onSendToChat, onChangeNpc }: FiscalDat
       {/* Botón No Inscripto */}
       <button
         onClick={() => setShowNoInscriptoModal(true)}
-        className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 hover:text-white font-medium py-2.5 px-3 rounded-lg text-xs transition-all"
+        disabled={!isNpcActive}
+        className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-800/50 disabled:cursor-not-allowed border border-zinc-600 text-zinc-300 hover:text-white disabled:text-zinc-600 font-medium py-2.5 px-3 rounded-lg text-xs transition-all"
       >
         <HelpCircle className="w-3.5 h-3.5" />
         ¿No estás inscripto?

@@ -9,17 +9,22 @@ export default function Home() {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [tutorialComplete, setTutorialComplete] = useState(false);
   const [isMuted, setIsMuted] = useState(true); // Inicia muteado por defecto
+  const [activeNpc, setActiveNpc] = useState<'arca' | 'dgr' | 'muni' | null>(null);
   const avatarPanelRef = useRef<AvatarPanelRef>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log('Mensaje recibido desde el iframe:', event.data);
       if (event.data?.type === 'GAME_READY') {
         setIframeLoaded(true);
       }
-      if (event.data?.type === 'AVATAR_INTERACTION') {
-        console.log('Interacción con el Avatar Fiscal iniciada desde el juego');
+      // Escuchar cuando el juego activa un NPC
+      if (event.data?.type === 'CHANGE_NPC' && event.data?.role) {
+        setActiveNpc(event.data.role as 'arca' | 'dgr' | 'muni');
+      }
+      // Escuchar cuando el usuario se aleja del NPC
+      if (event.data?.type === 'LEAVE_NPC') {
+        setActiveNpc(null);
       }
     };
 
@@ -70,7 +75,7 @@ export default function Home() {
       )}
       {/* Panel Izquierdo: Datos Fiscales */}
       <div className="w-[280px] h-screen border-r border-zinc-800 bg-zinc-950 flex-shrink-0">
-        <FiscalDataPanel onSendToChat={handleSendToChat} onChangeNpc={handleChangeNpc} />
+        <FiscalDataPanel onSendToChat={handleSendToChat} onChangeNpc={handleChangeNpc} activeNpc={activeNpc} />
       </div>
 
       {/* Centro: Juego con paneles arriba y abajo */}
